@@ -13,6 +13,15 @@ screen = pygame.display.set_mode((SCREEN_HEIGHT, SCREEN_WIDTH))  # window size
 pygame.display.set_caption("Test Game")  # window title
 screen.fill(WHITE)  # window background color
 
+
+def draw_objects():
+    """
+    TODO: make this function
+    :return:
+    """
+    pass
+
+
 clock = pygame.time.Clock()
 pygame.display.update()
 
