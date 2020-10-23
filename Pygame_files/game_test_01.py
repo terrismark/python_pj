@@ -11,7 +11,7 @@ pygame.init()  # initialising the program
 
 # Screen settings
 screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))  # window size
-pygame.display.set_caption("Test Game")  # window title
+pygame.display.set_caption("Test Game 1")  # window title
 icon = pygame.image.load('assets/icon.png')  # icon loading
 pygame.display.set_icon(icon)  # setting the icon
 
