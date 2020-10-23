@@ -1,2 +1,2 @@
-# python_pj
+# python projects
 Test projects on python 
