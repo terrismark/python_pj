@@ -8,11 +8,12 @@ class Snake:
     def __init__(self):
         self.color = (80, 118, 249)
         self.x = 2
-        self.y = (GRID_HEIGHT - 1) // 2
+        self.y = GRID_HEIGHT // 2
         self.poses = [(self.x * GRID_SIZE, self.y * GRID_SIZE),
                       ((self.x + 1) * GRID_SIZE, self.y * GRID_SIZE)]
         self.direction = (0, 0)
         self.upgrade = False
+        self.high_score = 0
 
     def draw(self):
         for i in self.poses:
@@ -35,7 +36,7 @@ class Snake:
 
     def reset_snake(self):
         self.x = 2
-        self.y = (GRID_HEIGHT - 1) // 2
+        self.y = GRID_HEIGHT // 2
         self.poses = [(self.x * GRID_SIZE, self.y * GRID_SIZE),
                       ((self.x + 1) * GRID_SIZE, self.y * GRID_SIZE)]
         self.direction = (0, 0)
@@ -84,7 +85,7 @@ class Game:
             if event.type == pg.QUIT:
                 pg.quit()
                 sys.exit()
-            # move every (repeating time) milliseconds
+            # move every 120 milliseconds
             if event.type == SCREEN_UPDATE:
                 self.update()
             if event.type == pg.KEYDOWN:
@@ -117,7 +118,7 @@ class Game:
     # game over states
     def game_over(self):
         # if snake hits walls
-        state_1 = GRID_SIZE <= self.snake.poses[0][0] < SCREEN_WIDTH - 2 * GRID_SIZE
+        state_1 = GRID_SIZE <= self.snake.poses[0][0] < SCREEN_WIDTH - 4 * GRID_SIZE
         state_2 = GRID_SIZE <= self.snake.poses[0][1] < SCREEN_HEIGHT - GRID_SIZE
         if not (state_1 and state_2):
             self.snake.reset_snake()
@@ -127,13 +128,27 @@ class Game:
             if i == self.snake.poses[0]:
                 self.snake.reset_snake()
 
+        # if snake is overflows all the field
+        if len(self.snake.poses) == GRID_WIDTH*GRID_HEIGHT - 1:
+            self.snake.reset_snake()
+
 
 # function that draws score
 def draw_score():
-    score = str(len(game.snake.poses) - 2)
-    score_text = score_font.render(score, True, (255, 255, 255))
+    # displaying current score
+    score = len(game.snake.poses) - 2
+    score_text = score_font.render(str(score), True, (255, 255, 255))
     score_rect = score_text.get_rect(center=(SCREEN_WIDTH - GRID_SIZE, 4*GRID_SIZE))
     screen.blit(score_text, score_rect)
+
+    # high score counting
+    if score != 0 and game.snake.high_score < score:
+        game.snake.high_score = score
+
+    # displaying high score
+    high_score_text = score_font.render(str(game.snake.high_score), True, (255, 255, 255))
+    high_score_rect = high_score_text.get_rect(center=(SCREEN_WIDTH - GRID_SIZE, 6*GRID_SIZE))
+    screen.blit(high_score_text, high_score_rect)
 
 
 # function that draws a grid layout
@@ -141,7 +156,9 @@ def draw_grid():
     for i in range(SCREEN_WIDTH // GRID_SIZE):
         for j in range(SCREEN_HEIGHT // GRID_SIZE):
             square = pg.Rect((i * GRID_SIZE, j * GRID_SIZE), (GRID_SIZE, GRID_SIZE))
-            if i == 0 or i >= SCREEN_WIDTH // GRID_SIZE - 2:
+            if i == SCREEN_WIDTH // GRID_SIZE - 3:
+                pg.draw.rect(surface, (0, 0, 0), square)
+            elif i == 0 or i == SCREEN_WIDTH // GRID_SIZE - 4 or i >= SCREEN_WIDTH // GRID_SIZE - 2:
                 if i >= SCREEN_WIDTH // GRID_SIZE - 2:
                     if j == 3 or j == 4:
                         pg.draw.rect(surface, (244, 55, 6), square)
@@ -165,17 +182,16 @@ clock = pg.time.Clock()
 # screen and grid params
 GRID_SIZE = 30
 SCREEN_HEIGHT = 540
-SCREEN_WIDTH = 570
-GRID_WIDTH = (SCREEN_WIDTH - 3 * GRID_SIZE) // GRID_SIZE
+SCREEN_WIDTH = 630
+GRID_WIDTH = (SCREEN_WIDTH - 5 * GRID_SIZE) // GRID_SIZE
 GRID_HEIGHT = (SCREEN_HEIGHT - 2 * GRID_SIZE) // GRID_SIZE
 
 # font
 pg.font.init()
 score_font = pg.font.SysFont('Comic Sans MS', 26)
-text_example = score_font.render("1123", True, (255, 255, 255))
 
 # moving each (repeat time) milliseconds
-repeat_time = 120
+repeat_time = 150
 SCREEN_UPDATE = pg.USEREVENT
 pg.time.set_timer(SCREEN_UPDATE, repeat_time)
 
@@ -202,5 +218,5 @@ while True:
     draw_score()
 
     pg.display.update()
-    clock.tick(60)
+    clock.tick(10)
 
