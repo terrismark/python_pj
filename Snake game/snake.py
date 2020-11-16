@@ -14,7 +14,7 @@ class Snake:
         self.direction = (0, 0)
         self.upgrade = False
 
-    def draw(self, surface):
+    def draw(self):
         for i in self.poses:
             snake_body_sell = (i, (GRID_SIZE, GRID_SIZE))
             pg.draw.rect(surface, self.color, snake_body_sell)
@@ -47,13 +47,13 @@ class Apple:
         self.color = (244, 55, 6)
         self.randomize_pos()
 
-    def draw(self, surface):
+    def draw(self):
         apple_square = (self.pos, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(surface, self.color, apple_square)
 
     def randomize_pos(self):
-        self.x = rnd.randint(0, GRID_WIDTH-1)
-        self.y = rnd.randint(0, GRID_HEIGHT-1)
+        self.x = rnd.randint(1, GRID_WIDTH)
+        self.y = rnd.randint(1, GRID_HEIGHT)
         self.pos = (self.x * GRID_SIZE, self.y * GRID_SIZE)
 
 
@@ -64,11 +64,11 @@ class Game:
         self.apple = Apple()
         self.snake = Snake()
 
-    def draw_objects(self, surface):
+    def draw_objects(self):
         # drawing surface, apple and a snake
-        draw_grid(surface)
-        self.apple.draw(surface)
-        self.snake.draw(surface)
+        draw_grid()
+        self.apple.draw()
+        self.snake.draw()
 
     def update(self):
         # move snake
@@ -117,8 +117,8 @@ class Game:
     # game over states
     def game_over(self):
         # if snake hits walls
-        state_1 = 0 <= self.snake.poses[0][0] < SCREEN_WIDTH
-        state_2 = 0 <= self.snake.poses[0][1] < SCREEN_HEIGHT
+        state_1 = GRID_SIZE <= self.snake.poses[0][0] < SCREEN_WIDTH - 2 * GRID_SIZE
+        state_2 = GRID_SIZE <= self.snake.poses[0][1] < SCREEN_HEIGHT - GRID_SIZE
         if not (state_1 and state_2):
             self.snake.reset_snake()
 
@@ -128,55 +128,79 @@ class Game:
                 self.snake.reset_snake()
 
 
-# function that draws a grid layout
-def draw_grid(surface):
-    for i in range(GRID_WIDTH):
-        for j in range(GRID_HEIGHT):
-            square = pg.Rect((i * GRID_SIZE, j * GRID_SIZE), (GRID_SIZE, GRID_SIZE))
-            if (i + j) % 2 == 0:
-                pg.draw.rect(surface, (167, 217, 72), square)
-            else:
-                pg.draw.rect(surface, (132, 189, 53), square)
+# function that draws score
+def draw_score():
+    score = str(len(game.snake.poses) - 2)
+    score_text = score_font.render(score, True, (255, 255, 255))
+    score_rect = score_text.get_rect(center=(SCREEN_WIDTH - GRID_SIZE, 4*GRID_SIZE))
+    screen.blit(score_text, score_rect)
 
+
+# function that draws a grid layout
+def draw_grid():
+    for i in range(SCREEN_WIDTH // GRID_SIZE):
+        for j in range(SCREEN_HEIGHT // GRID_SIZE):
+            square = pg.Rect((i * GRID_SIZE, j * GRID_SIZE), (GRID_SIZE, GRID_SIZE))
+            if i == 0 or i >= SCREEN_WIDTH // GRID_SIZE - 2:
+                if i >= SCREEN_WIDTH // GRID_SIZE - 2:
+                    if j == 3 or j == 4:
+                        pg.draw.rect(surface, (244, 55, 6), square)
+                    else:
+                        pg.draw.rect(surface, (74, 117, 44), square)
+                else:
+                    pg.draw.rect(surface, (74, 117, 44), square)
+            elif j == 0 or j >= SCREEN_HEIGHT // GRID_SIZE - 1:
+                pg.draw.rect(surface, (74, 117, 44), square)
+            else:
+                if (i + j) % 2 == 0:
+                    pg.draw.rect(surface, (167, 217, 72), square)
+                else:
+                    pg.draw.rect(surface, (132, 189, 53), square)
+
+
+# initializing the game
+pg.init()
+clock = pg.time.Clock()
 
 # screen and grid params
 GRID_SIZE = 30
-SCREEN_HEIGHT = 480
-SCREEN_WIDTH = 480
-GRID_WIDTH = SCREEN_WIDTH // GRID_SIZE
-GRID_HEIGHT = SCREEN_HEIGHT // GRID_SIZE
+SCREEN_HEIGHT = 540
+SCREEN_WIDTH = 570
+GRID_WIDTH = (SCREEN_WIDTH - 3 * GRID_SIZE) // GRID_SIZE
+GRID_HEIGHT = (SCREEN_HEIGHT - 2 * GRID_SIZE) // GRID_SIZE
+
+# font
+pg.font.init()
+score_font = pg.font.SysFont('Comic Sans MS', 26)
+text_example = score_font.render("1123", True, (255, 255, 255))
 
 # moving each (repeat time) milliseconds
 repeat_time = 120
 SCREEN_UPDATE = pg.USEREVENT
 pg.time.set_timer(SCREEN_UPDATE, repeat_time)
 
+# screen
+screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
 
-# main function
-def main():
-    # initializing the game
-    pg.init()
-    clock = pg.time.Clock()
+# making the surface
+surface = pg.Surface(screen.get_size()).convert()
 
-    # making the surface
-    screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
-    surface = pg.Surface(screen.get_size()).convert()
+# initializing main Game object
+game = Game()
 
-    # initializing main Game object
-    game = Game()
+# game loop
+while True:
+    # event handling
+    game.event_handler()
 
-    # game loop
-    while True:
-        # event handling
-        game.event_handler()
+    # drawing surface, apple and a snake
+    game.draw_objects()
+    # screen update
+    screen.blit(surface, (0, 0))
 
-        # drawing surface, apple and a snake
-        game.draw_objects(surface)
+    # draw score
+    draw_score()
 
-        # screen update
-        screen.blit(surface, (0, 0))
-        pg.display.update()
-        clock.tick(60)
+    pg.display.update()
+    clock.tick(60)
 
-
-main()
