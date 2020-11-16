@@ -71,6 +71,7 @@ class Game:
         self.apple.draw()
         self.snake.draw()
 
+    # updating the grid snake and apples
     def update(self):
         # move snake
         self.snake.move()
@@ -79,6 +80,7 @@ class Game:
         # check if game over
         self.game_over()
 
+    # user event handler
     def event_handler(self):
         for event in pg.event.get():
             # if quiting
@@ -138,6 +140,8 @@ def draw_score():
     # displaying current score
     score = len(game.snake.poses) - 2
     score_text = score_font.render(str(score), True, (255, 255, 255))
+
+    # text should be on the at the intersection of grid cells
     score_rect = score_text.get_rect(center=(SCREEN_WIDTH - GRID_SIZE, 4*GRID_SIZE))
     screen.blit(score_text, score_rect)
 
@@ -147,6 +151,8 @@ def draw_score():
 
     # displaying high score
     high_score_text = score_font.render(str(game.snake.high_score), True, (255, 255, 255))
+
+    # text should be on the at the intersection of grid cells
     high_score_rect = high_score_text.get_rect(center=(SCREEN_WIDTH - GRID_SIZE, 6*GRID_SIZE))
     screen.blit(high_score_text, high_score_rect)
 
@@ -155,20 +161,29 @@ def draw_score():
 def draw_grid():
     for i in range(SCREEN_WIDTH // GRID_SIZE):
         for j in range(SCREEN_HEIGHT // GRID_SIZE):
+            # the grid consists os squares
             square = pg.Rect((i * GRID_SIZE, j * GRID_SIZE), (GRID_SIZE, GRID_SIZE))
+
+            # the black line
             if i == SCREEN_WIDTH // GRID_SIZE - 3:
                 pg.draw.rect(surface, (0, 0, 0), square)
+
+            # the edges in width are filled with dark green color
             elif i == 0 or i == SCREEN_WIDTH // GRID_SIZE - 4 or i >= SCREEN_WIDTH // GRID_SIZE - 2:
                 if i >= SCREEN_WIDTH // GRID_SIZE - 2:
+                    # red where current score displays
                     if j == 3 or j == 4:
                         pg.draw.rect(surface, (244, 55, 6), square)
                     else:
                         pg.draw.rect(surface, (74, 117, 44), square)
                 else:
                     pg.draw.rect(surface, (74, 117, 44), square)
+
+            # the edges in width are filled with dark green color
             elif j == 0 or j >= SCREEN_HEIGHT // GRID_SIZE - 1:
                 pg.draw.rect(surface, (74, 117, 44), square)
             else:
+                # the field is like a chess board (green and light green)
                 if (i + j) % 2 == 0:
                     pg.draw.rect(surface, (167, 217, 72), square)
                 else:
@@ -183,6 +198,7 @@ clock = pg.time.Clock()
 GRID_SIZE = 30
 SCREEN_HEIGHT = 540
 SCREEN_WIDTH = 630
+# How many cells of the screen are for the snake and apples
 GRID_WIDTH = (SCREEN_WIDTH - 5 * GRID_SIZE) // GRID_SIZE
 GRID_HEIGHT = (SCREEN_HEIGHT - 2 * GRID_SIZE) // GRID_SIZE
 
@@ -196,7 +212,7 @@ SCREEN_UPDATE = pg.USEREVENT
 pg.time.set_timer(SCREEN_UPDATE, repeat_time)
 
 # screen
-screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT), 0, 32)
+screen = pg.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
 
 # making the surface
 surface = pg.Surface(screen.get_size()).convert()
@@ -217,6 +233,7 @@ while True:
     # draw score
     draw_score()
 
+    # display update
     pg.display.update()
     clock.tick(10)
 
