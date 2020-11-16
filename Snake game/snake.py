@@ -9,32 +9,43 @@ class Snake:
         self.color = (80, 118, 249)
         self.x = 2
         self.y = GRID_HEIGHT // 2
+        # cells for the snake
         self.poses = [(self.x * GRID_SIZE, self.y * GRID_SIZE),
                       ((self.x + 1) * GRID_SIZE, self.y * GRID_SIZE)]
+        # direction of the snake
         self.direction = (0, 0)
+        # has snake eaten an apple
         self.upgrade = False
+        # snake's high score
         self.high_score = 0
 
     def draw(self):
+        # drawing each cell for the snake
         for i in self.poses:
             snake_body_sell = (i, (GRID_SIZE, GRID_SIZE))
             pg.draw.rect(surface, self.color, snake_body_sell)
 
     def move(self):
+        # moving the head and tail
         if not self.upgrade:
+            # if no apples eaten
             tail = self.poses[:-1]
         else:
+            # else
             tail = self.poses.copy()
             self.upgrade = False
+        # move each cell
         moved_body = (tail[0][0] + self.direction[0] * GRID_SIZE,
                       tail[0][1] + self.direction[1] * GRID_SIZE)
         tail.insert(0, moved_body)
+        # now snakes poses are ready for drawing
         self.poses = tail.copy()
 
     def size_up(self):
         self.upgrade = True
 
     def reset_snake(self):
+        # resetting every snake parameter
         self.x = 2
         self.y = GRID_HEIGHT // 2
         self.poses = [(self.x * GRID_SIZE, self.y * GRID_SIZE),
@@ -48,10 +59,12 @@ class Apple:
         self.color = (244, 55, 6)
         self.randomize_pos()
 
+    # drawing the apple
     def draw(self):
         apple_square = (self.pos, (GRID_SIZE, GRID_SIZE))
         pg.draw.rect(surface, self.color, apple_square)
 
+    # generating an apple in a random cell
     def randomize_pos(self):
         self.x = rnd.randint(1, GRID_WIDTH)
         self.y = rnd.randint(1, GRID_HEIGHT)
@@ -89,7 +102,7 @@ class Game:
                 sys.exit()
             # move every 120 milliseconds
             if event.type == SCREEN_UPDATE:
-                self.update()
+                self.update()  # FIXIT TODO: BUG!!! when turning to quickly snake can turn back
             if event.type == pg.KEYDOWN:
                 # move up if key up is down
                 if event.key == pg.K_UP and self.snake.direction != (0, 1):
@@ -113,6 +126,7 @@ class Game:
             # snake size up
             self.snake.size_up()
 
+        # apple cant be inside the snake
         for i in self.snake.poses:
             if i == self.apple.pos:
                 self.apple.randomize_pos()
@@ -236,4 +250,3 @@ while True:
     # display update
     pg.display.update()
     clock.tick(10)
-
